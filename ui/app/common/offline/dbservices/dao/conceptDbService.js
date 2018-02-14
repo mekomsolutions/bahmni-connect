@@ -40,6 +40,7 @@ angular.module('bahmni.common.offline')
             var insertConcept = function (data, parent) {
                 var concept = db.getSchema().table('concept');
                 var uuid = data.results && data.results[0] ? data.results[0].uuid : undefined;
+                var conceptClass = data.results && data.results[0] ? data.results[0].conceptClass : undefined;
                 return getParents(uuid).then(function (response) {
                     var parents = {};
                     if (response.length == 0 || response[0].parents == undefined) {
@@ -59,8 +60,10 @@ angular.module('bahmni.common.offline')
                     var row = concept.createRow({
                         data: data,
                         name: data.results[0].name.name,
+                        searchKey: data.results[0].name.name.toUpperCase(),
                         uuid: uuid,
-                        parents: parents
+                        parents: parents,
+                        conceptClassUuid: conceptClass.uuid
                     });
 
                     return db.insertOrReplace().into(concept).values([row]).exec();
@@ -72,6 +75,15 @@ angular.module('bahmni.common.offline')
                 return db.select(concept.parents)
                     .from(concept)
                     .where(concept.uuid.eq(childUuid)).exec();
+            };
+
+            var getConceptByClassAndSearchTerm = function (classUuid, searchTerm) {
+                var deferred = $q.defer();
+                var concept = db.getSchema().table('concept');
+                return db.select()
+                .from(concept)
+                .where(lf.op.and(concept.conceptClassUuid.eq(classUuid), concept.searchKey.match(searchTerm.toUpperCase())))
+                .exec();
             };
 
             var updateChildren = function (concept) {
@@ -135,6 +147,7 @@ angular.module('bahmni.common.offline')
                 getConcept: getConcept,
                 getConceptByName: getConceptByName,
                 insertConceptAndUpdateHierarchy: insertConceptAndUpdateHierarchy,
+                getConceptByClassAndSearchTerm: getConceptByClassAndSearchTerm,
                 updateChildren: updateChildren,
                 updateParentJson: updateParentJson,
                 getAllParentsInHierarchy: getAllParentsInHierarchy
