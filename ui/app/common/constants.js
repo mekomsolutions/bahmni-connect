@@ -279,7 +279,8 @@ Bahmni.Common = Bahmni.Common || {};
         eventlogFilterUrl: hostUrl + "/openmrs/ws/rest/v1/eventlog/filter",
         bahmniConnectMetaDataDb: "metaData",
         bahmniConnectVersion: "0.89",
-        defaultBahmniConnectDb: "Bahmni"
+        defaultBahmniConnectDb: "Bahmni",
+        diagnosisConceptClassUuid: "8d4918b0-c2cc-11de-8d13-0010c6dffd0f"
     };
 })();
 

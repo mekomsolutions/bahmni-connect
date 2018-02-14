@@ -2,7 +2,7 @@
 
 describe('offlineDiagnosisService', function () {
 
-    var diagnosisService, encounterServiceStrategy;
+    var diagnosisService, encounterServiceStrategy, conceptDbService;
     var $q = Q;
     var patientUuid = 'fc6ede09-f16f-4877-d2f5-ed8b2182ec10';
 
@@ -13,14 +13,22 @@ describe('offlineDiagnosisService', function () {
         $provide.value('$q', $q);
     }));
 
-    beforeEach(inject(['diagnosisService', 'offlineEncounterServiceStrategy', function (diagnosisServiceInjected, encounterServiceStrategyInjected) {
+    beforeEach(inject(['diagnosisService', 'offlineEncounterServiceStrategy', 'conceptDbService', function (diagnosisServiceInjected, encounterServiceStrategyInjected, conceptDbServiceInjected) {
         diagnosisService = diagnosisServiceInjected;
         encounterServiceStrategy = encounterServiceStrategyInjected;
+        conceptDbService = conceptDbServiceInjected;
 
         spyOn(encounterServiceStrategy, 'getEncountersByPatientUuid').and.callFake(function () {
             return {
                 then: function (callback) {
                     return callback(encounterResponse);
+                }
+            };
+        });
+        spyOn(conceptDbService, 'getConceptByClassAndSearchTerm').and.callFake(function (searchTerm) {
+            return {
+                then: function (callback) {
+                    return callback("aresponse")
                 }
             };
         });
@@ -34,6 +42,16 @@ describe('offlineDiagnosisService', function () {
             expect(result.data.length).toBe(2);
         });
 
+
+    });
+
+    it('should search and return diagnosis by term', function () {
+
+        diagnosisService.getAllFor("aTerm").then(function (result) {
+            expect(result.data).toBe("aresponse");
+        });
+
+        expect(conceptDbService.getConceptByClassAndSearchTerm.calls.any()).toEqual(true);
 
     });
 

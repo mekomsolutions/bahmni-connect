@@ -396,6 +396,12 @@ Bahmni.Common.Offline.MetaDataSchemaDefinitions = {
                 name: 'name',
                 type: 'STRING'
             }, {
+                name: 'searchKey',
+                type: 'STRING'
+            }, {
+                name: 'conceptClassUuid',
+                type: 'STRING'
+            }, {
                 name: 'parents',
                 type: 'OBJECT'
             }

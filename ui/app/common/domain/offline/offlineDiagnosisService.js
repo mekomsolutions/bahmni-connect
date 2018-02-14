@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.domain')
-    .service('diagnosisService', ['$q', 'offlineEncounterServiceStrategy',
-        function ($q, offlineEncounterServiceStrategy) {
+    .service('diagnosisService', ['$q', 'offlineEncounterServiceStrategy', 'conceptDbService',
+        function ($q, offlineEncounterServiceStrategy, conceptDbService) {
             var filterAndSortDiagnosis = function (diagnoses) {
                 diagnoses = _.filter(diagnoses, function (singleDiagnosis) {
                     return singleDiagnosis.revised == false;
@@ -26,8 +26,15 @@ angular.module('bahmni.common.domain')
                 return deferred.promise;
             };
 
+            // Searches for diagnoses concepts
             this.getAllFor = function (searchTerm) {
-                return $q.when({"data": {}});
+                var deferred = $q.defer();
+                var diags = [];
+                var classUuid = Bahmni.Common.Constants.diagnosisConceptClassUuid;
+                conceptDbService.getConceptByClassAndSearchTerm(classUuid, searchTerm).then(function (results) {
+                    deferred.resolve({"data": results});
+                });
+                return deferred.promise;
             };
 
             this.deleteDiagnosis = function (obsUuid) {
