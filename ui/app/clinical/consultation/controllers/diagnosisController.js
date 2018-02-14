@@ -10,7 +10,7 @@ angular.module('bahmni.clinical')
             $scope.certaintyOptions = ['CONFIRMED', 'PRESUMED'];
 
             $scope.getDiagnosis = function (params) {
-                return diagnosisService.getAllFor(params.term);
+                return diagnosisService.searchForDiagnosisConcepts(params.term).then(mapConcept);
             };
 
             var _canAdd = function (diagnosis) {
@@ -100,42 +100,10 @@ angular.module('bahmni.clinical')
             };
             contextChangeHandler.add(contextChange);
 
-            $scope.cleanOutDiagnosisList = function (result) {
-                var data = result.data;
-                var mappedResponse = data.map(
-                    function (concept) {
-                        if (concept.conceptName === concept.matchedName) {
-                            return {
-                                'value': concept.matchedName,
-                                'concept': {
-                                    'name': concept.conceptName,
-                                    'uuid': concept.conceptUuid
-                                },
-                                lookup: {
-                                    'name': concept.conceptName,
-                                    'uuid': concept.conceptUuid
-                                }
-                            };
-                        }
-                        return {
-                            'value': concept.matchedName + "=>" + concept.conceptName,
-                            'concept': {
-                                'name': concept.conceptName,
-                                'uuid': concept.conceptUuid
-                            },
-                            lookup: {
-                                'name': concept.matchedName,
-                                'uuid': concept.conceptUuid
-                            }
-                        };
-                    }
-                );
-                return filterOutSelectedDiagnoses(mappedResponse);
-            };
-
-            var filterOutSelectedDiagnoses = function (allDiagnoses) {
-                return allDiagnoses.filter(function (diagnosis) {
-                    return !alreadyAddedToDiagnosis(diagnosis);
+            // Filter out the diagnoses to remove the ones that have already been selected
+            $scope.cleanOutDiagnosisList = function (allDiagnosisConcepts) {
+                return allDiagnosisConcepts.filter(function (diagConcept) {
+                    return !alreadyAddedToDiagnosis(diagConcept);
                 });
             };
 
@@ -193,22 +161,30 @@ angular.module('bahmni.clinical')
             $scope.consultation.preSaveHandler.register("diagnosisSaveHandlerKey", removeBlankDiagnosis);
             $scope.$on('$destroy', removeBlankDiagnosis);
 
-            $scope.processDiagnoses = function (data) {
-                data.map(
-                    function (concept) {
-                        if (concept.conceptName === concept.matchedName) {
-                            return {
-                                'value': concept.matchedName,
-                                'concept': concept
-                            };
+            var mapConcept = function (result) {
+                return _.map(result.data, function (concept) {
+                    var response = {
+                        value: concept.matchedName || concept.conceptName,
+                        concept: {
+                            name: concept.conceptName,
+                            uuid: concept.conceptUuid
+                        },
+                        lookup: {
+                            name: concept.conceptName,
+                            uuid: concept.conceptUuid
                         }
-                        return {
-                            'value': concept.matchedName + "=>" + concept.conceptName,
-                            'concept': concept
-                        };
+                    };
+
+                    if (concept.matchedName && concept.matchedName !== concept.conceptName) {
+                        response.value = response.value + " => " + concept.conceptName;
                     }
-                );
+                    if (concept.code) {
+                        response.value = response.value + " (" + concept.code + ")";
+                    }
+                    return response;
+                });
             };
+
             $scope.restEmptyRowsToOne = function (index) {
                 var iter;
                 for (iter = 0; iter < $scope.consultation.newlyAddedDiagnoses.length; iter++) {

@@ -66,12 +66,12 @@ describe('conceptDbService tests', function () {
                 })
             }).then(function (result) {
                 conceptDbService.insertConceptAndUpdateHierarchy(weightConceptJson).then(function(){
-                   conceptDbService.getConcept(weightUuid).then(function(result) {
+                 conceptDbService.getConcept(weightUuid).then(function(result) {
                     expect(result.conceptClassUuid).toEqual(diagConceptClassUuid);
                     expect(result.searchKey).toEqual(weightExpectedSearchKey);
                     done();
                 })
-               })
+             })
             })
         });
     });
@@ -82,23 +82,33 @@ describe('conceptDbService tests', function () {
         jasmine.getFixtures().fixturesPath = 'base/test/data';
 
         var conceptJson = JSON.parse(readFixtures('concept.json'));
-        var uuid = "c36a7537-3f10-11e4-adec-0800271c1b75";
+        var weightConceptJson = JSON.parse(readFixtures('weightConcept.json'));
+        
+        var vitalsUuid = "c36a7537-3f10-11e4-adec-0800271c1b75";
+        var weightUuid = "bb0c3a50-d214-4cd5-9889-2d30e69330d3";
+        
+        var vitalsExpectedSearchKey = "VITALS";
+        var weightExpectedSearchKey = "OTITIS";
+
         var miscConceptClassUuid = "8d492774-c2cc-11de-8d13-0010c6dffd0f";
         var diagConceptClassUuid = "924c5978-c966-480d-9356-7bba3d30775b";
 
         schemaBuilder.connect().then(function(db){
             conceptDbService.init(db);
             conceptDbService.insertConceptAndUpdateHierarchy(conceptJson).then(function(){
-                conceptDbService.getConceptByClassAndSearchTerm(miscConceptClassUuid, "aterm").then(function(results){
+            }).then(function (result) {
+                conceptDbService.insertConceptAndUpdateHierarchy(weightConceptJson).then(function(){
+                  conceptDbService.getConceptsByClassAndSearchTerm(miscConceptClassUuid, "aterm").then(function(results){
                     expect(results.length).toBe(0);
                 });
-                conceptDbService.getConceptByClassAndSearchTerm(diagConceptClassUuid, "oti").then(function(results){
+                  conceptDbService.getConceptsByClassAndSearchTerm(diagConceptClassUuid, "oti").then(function(results){
                     expect(results.length).toBe(1);
                 });
-                conceptDbService.getConceptByClassAndSearchTerm(miscConceptClassUuid, "vit").then(function(results){
+                  conceptDbService.getConceptsByClassAndSearchTerm(miscConceptClassUuid, "vit").then(function(results){
                     expect(results.length).toBe(1);
-                    done()
+                    done();
                 });     
+              })
             })
         });
     });
