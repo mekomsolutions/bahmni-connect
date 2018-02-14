@@ -77,8 +77,7 @@ angular.module('bahmni.common.offline')
                     .where(concept.uuid.eq(childUuid)).exec();
             };
 
-            var getConceptByClassAndSearchTerm = function (classUuid, searchTerm) {
-                var deferred = $q.defer();
+            var getConceptsByClassAndSearchTerm = function (classUuid, searchTerm) {
                 var concept = db.getSchema().table('concept');
                 return db.select()
                 .from(concept)
@@ -147,7 +146,7 @@ angular.module('bahmni.common.offline')
                 getConcept: getConcept,
                 getConceptByName: getConceptByName,
                 insertConceptAndUpdateHierarchy: insertConceptAndUpdateHierarchy,
-                getConceptByClassAndSearchTerm: getConceptByClassAndSearchTerm,
+                getConceptsByClassAndSearchTerm: getConceptsByClassAndSearchTerm,
                 updateChildren: updateChildren,
                 updateParentJson: updateParentJson,
                 getAllParentsInHierarchy: getAllParentsInHierarchy

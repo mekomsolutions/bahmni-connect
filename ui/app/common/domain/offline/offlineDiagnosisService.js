@@ -1,8 +1,9 @@
 'use strict';
 
 angular.module('bahmni.common.domain')
-    .service('diagnosisService', ['$q', 'offlineEncounterServiceStrategy', 'conceptDbService',
-        function ($q, offlineEncounterServiceStrategy, conceptDbService) {
+    .service('diagnosisService', ['$q', '$rootScope', 'offlineEncounterServiceStrategy', 'conceptDbService',
+        function ($q, $rootScope, offlineEncounterServiceStrategy, conceptDbService) {
+            var self = this;
             var filterAndSortDiagnosis = function (diagnoses) {
                 diagnoses = _.filter(diagnoses, function (singleDiagnosis) {
                     return singleDiagnosis.revised == false;
@@ -26,13 +27,19 @@ angular.module('bahmni.common.domain')
                 return deferred.promise;
             };
 
-            // Searches for diagnoses concepts
-            this.getAllFor = function (searchTerm) {
+            this.searchForDiagnosisConcepts = function (searchTerm) {
                 var deferred = $q.defer();
-                var diags = [];
+                var diagnoses = [];
                 var classUuid = Bahmni.Common.Constants.diagnosisConceptClassUuid;
-                conceptDbService.getConceptByClassAndSearchTerm(classUuid, searchTerm).then(function (results) {
-                    deferred.resolve({"data": results});
+                conceptDbService.getConceptsByClassAndSearchTerm(classUuid, searchTerm).then(function (concepts) {
+                    _.each(concepts, function (concept) {
+                        diagnoses.push({
+                            "conceptName": concept.name,
+                            "conceptUuid": concept.uuid,
+                            "matchedName": null
+                        });
+                    });
+                    deferred.resolve({"data": diagnoses});
                 });
                 return deferred.promise;
             };
@@ -46,7 +53,15 @@ angular.module('bahmni.common.domain')
             };
 
             this.getPastAndCurrentDiagnoses = function (patientUuid, encounterUuid) {
-                return $q.when({"data": {}});
+                var deferred = $q.defer();
+                return self.getDiagnoses(patientUuid).then(function (response) {
+                    var diagnosisMapper = new Bahmni.DiagnosisMapper($rootScope.diagnosisStatus);
+                    var allDiagnoses = diagnosisMapper.mapDiagnoses(response.data);
+                    var pastDiagnoses = diagnosisMapper.mapPastDiagnosis(allDiagnoses, encounterUuid);
+                    var savedDiagnosesFromCurrentEncounter = diagnosisMapper.mapSavedDiagnosesFromCurrentEncounter(allDiagnoses, encounterUuid);
+                    deferred.resolve({"pastDiagnoses": pastDiagnoses, "savedDiagnosesFromCurrentEncounter": savedDiagnosesFromCurrentEncounter});
+                    return deferred.promise;
+                });
             };
 
             this.populateDiagnosisInformation = function (patientUuid, consultation) {

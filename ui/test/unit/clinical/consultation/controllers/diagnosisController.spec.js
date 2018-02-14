@@ -23,8 +23,7 @@ describe("Diagnosis Controller", function () {
 
         contextChangeHandler = jasmine.createSpyObj('contextChangeHandler', ['add']);
         spyOn(diagnosisService, 'getDiagnosisConceptSet').and.returnValue(deferred.promise);
-        spyOn(diagnosisService, 'getAllFor').and.returnValue({});
-
+        
         spinner = jasmine.createSpyObj('spinner', ['forPromise']);
         spinner.forPromise.and.callFake(function (param) {
             return {
@@ -72,11 +71,86 @@ describe("Diagnosis Controller", function () {
     });
 
     describe("getDiagnosis()", function () {
-        it("should make a call to diagnosis service getAllFor", function () {
+        it("should make a call to diagnosis service searchForDiagnosisConcepts", function () {
+
+            spyOn(mockDiagnosisService, 'searchForDiagnosisConcepts').and.returnValue(deferred.promise);
+
             $scope.getDiagnosis({term:"primary"});
-            expect(mockDiagnosisService.getAllFor).toHaveBeenCalledWith("primary");
+            expect(mockDiagnosisService.searchForDiagnosisConcepts).toHaveBeenCalledWith("primary");
+
         });
     });
+
+
+    describe("cleanOutDiagnosisList()", function () {
+        it("should return a filtered diagnosis list without duplicates", function () {
+
+            var mockDiagnosis1 = new Bahmni.Common.Domain.Diagnosis({"name": "Otitis", "uuid":"SomeUuid-9877"});
+
+            var diagConcept1 = {
+                "concept": {
+                    "name": "Otitis",
+                    "uuid": "SomeUuid-9877"
+                }
+            }
+            
+            var diagConcept2 = {
+                "concept": {
+                    "name": "Angina",
+                    "uuid": "SomeUuid-2345"
+                }
+            }
+            
+            var data = [];
+            data.push(diagConcept1, diagConcept2);
+            var allDiagsResults = {};
+            allDiagsResults.data = data;
+            
+            expect($scope.cleanOutDiagnosisList(data).length).toEqual(2)
+            
+            // Adding Diagnosis1 in the scope. Expecting diag1 to not be returned by cleanOutDiagnosisList() 
+            $scope.consultation.newlyAddedDiagnoses.push(mockDiagnosis1)
+            expect($scope.cleanOutDiagnosisList(data).length).toEqual(1)
+
+            var diagConcept3 = {
+                "concept": {
+                    "name": "Dengue",
+                    "uuid": "SomeUuid-7855"
+                }
+            }
+            data.push(diagConcept3);
+
+            expect($scope.cleanOutDiagnosisList(data).length).toEqual(2)
+            expect($scope.cleanOutDiagnosisList(data)[0].concept.name).toEqual(diagConcept2.concept.name)
+            expect($scope.cleanOutDiagnosisList(data)[1].concept.name).toEqual(diagConcept3.concept.name)
+        })
+    })
+
+    describe('getAddNewDiagnosisMethod()', function() {
+        it("should add the new diag to the $scope", function() {
+
+            var mockDiagnosis = new Bahmni.Common.Domain.Diagnosis({"name": "Otitis", "uuid":"SomeUuid-9877"});
+            // var mockDiagnosis = new Bahmni.Common.Domain.Diagnosis({"name": "Angina", "uuid":"SomeUuid-2345"});
+
+            var diagConcept = {
+                "concept": {
+                    "name": "Otitis",
+                    "uuid": "SomeUuid-9877"
+                },
+                "lookup": {
+                    "name": "Otitis",
+                    "uuid": "SomeUuid-9877"
+                }
+            }
+            var data = [diagConcept];
+            
+            $scope.consultation.newlyAddedDiagnoses.push(mockDiagnosis)
+
+            $scope.getAddNewDiagnosisMethod(mockDiagnosis)(diagConcept)
+            expect($scope.consultation.newlyAddedDiagnoses[1]).toEqual(mockDiagnosis)
+            expect($scope.consultation.newlyAddedDiagnoses.length).toEqual(2)
+        })
+    })
 
     describe("should validate the diagnosis", function(){
         it("should throw error message for duplicate diagnosis", function(){
@@ -138,4 +212,54 @@ describe("Diagnosis Controller", function () {
         });
     });
 
+    var mockDiagnosisConceptResponse = [
+    { 
+        "data": { 
+            "results": [
+            {
+                'uuid': 'b056563c-5d0c-43e2-b646-29dfda7359cd',
+                'name': {
+                    'display': 'Otitis',
+                    'uuid': '5ce2d785-4a52-4bab-a604-4d43bfe4a930',
+                    'name': 'Otitis',
+                    'locale': 'en',
+                    'localePreferred': true,
+                    'conceptNameType': 'FULLY_SPECIFIED'
+                }
+            }
+            ] 
+        },
+        "name": "Otitis",
+        "searchKey": 'OTITIS',
+        "uuid": 'b056563c-5d0c-43e2-b646-29dfda7359cd',
+        "parents": {
+            "parentConcepts": []
+        },
+        "conceptClassUuid": '8d492774-c2cc-11de-8d13-0010c6dffd0f'
+    },
+    { 
+        "data": { 
+            "results": [
+            {
+                'uuid': '71971cb1-b1b1-4341-a03d-6fa220e1ec0f',
+                'name': {
+                    'display': 'Tuberculosis',
+                    'uuid': 'c16201a0-8e65-4a30-9ed5-050c174d1f87',
+                    'name': 'Tuberculosis',
+                    'locale': 'en',
+                    'localePreferred': true,
+                    'conceptNameType': 'FULLY_SPECIFIED'
+                }
+            }
+            ] 
+        },
+        "name": "Tuberculosis",
+        "searchKey": 'TUBERCULOSIS',
+        "uuid": '71971cb1-b1b1-4341-a03d-6fa220e1ec0f',
+        "parents": {
+            "parentConcepts": []
+        },
+        "conceptClassUuid": '8d492774-c2cc-11de-8d13-0010c6dffd0f'
+    }
+    ]
 });
