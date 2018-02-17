@@ -69,6 +69,23 @@ describe("EncounterTransactionMapper", function () {
 
         });
 
+        it('should keep the diagnoses codedAnswer uuid and name in encounterData', function () {
+            var obs = {uuid: "obsUuid"};
+            var defaultVisitType = "OPD";
+            var diag1 = new Bahmni.Common.Domain.Diagnosis({name: "Dengue", uuid: "a-Uuid-1345"});
+            var consultation = {
+                observations: obs,
+                providers: [{uuid: "provider-uuid"}],
+                visitUuid: null,
+                newlyAddedDiagnoses: [diag1]
+            };
+            var patient = { uuid:"patientUuid"};
+            
+            var encounterData = mapper.map(consultation, patient, null, {}, null, defaultVisitType, false);
+            expect(encounterData.bahmniDiagnoses[0].codedAnswer.name).toBe(diag1.codedAnswer.name)
+            expect(encounterData.bahmniDiagnoses[0].codedAnswer.uuid).toBe(diag1.codedAnswer.uuid)
+        })
+
         it('should set program enrollment uuid as patient program uuid', function(){
             var obs = {uuid: "obsUuid"};
             var defaultRetrospectiveVisitType = "IPD";
