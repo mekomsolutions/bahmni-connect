@@ -39,32 +39,23 @@ Bahmni.Clinical.EncounterTransactionMapper = function () {
             encounterData.visitType = defaultVisitType;
         }
 
-        var mapDiagnosis = function (diagnosis) {
-            return {
-                codedAnswer: {
-                    uuid: !diagnosis.isNonCodedAnswer ? diagnosis.codedAnswer.uuid : undefined,
-                    name: !diagnosis.isNonCodedAnswer ? diagnosis.codedAnswer.name : undefined
-                },
-                freeTextAnswer: diagnosis.isNonCodedAnswer ? diagnosis.codedAnswer.name : undefined,
-                order: diagnosis.order,
-                certainty: diagnosis.certainty,
-                existingObs: null,
-                diagnosisDateTime: null,
-                diagnosisStatusConcept: diagnosis.diagnosisStatusConcept,
-                voided: diagnosis.voided,
-                comments: diagnosis.comments,
-                encounterUuid: diagnosis.encounterUuid
-            };
-        }
-
-        encounterData.bahmniDiagnoses = [];
-        
         if (consultation.newlyAddedDiagnoses && consultation.newlyAddedDiagnoses.length > 0) {
-            _.each(consultation.savedDiagnosesFromCurrentEncounter, function (diagnosis) {
-                encounterData.bahmniDiagnoses.push(mapDiagnosis(diagnosis))
-            });
-            _.each(consultation.newlyAddedDiagnoses, function (diagnosis) {
-                encounterData.bahmniDiagnoses.push(mapDiagnosis(diagnosis))
+            encounterData.bahmniDiagnoses = consultation.newlyAddedDiagnoses.map(function (diagnosis) {
+                return {
+                    codedAnswer: {
+                        uuid: !diagnosis.isNonCodedAnswer ? diagnosis.codedAnswer.uuid : undefined,
+                        name: !diagnosis.isNonCodedAnswer ? diagnosis.codedAnswer.name : undefined
+                    },
+                    freeTextAnswer: diagnosis.isNonCodedAnswer ? diagnosis.codedAnswer.name : undefined,
+                    order: diagnosis.order,
+                    certainty: diagnosis.certainty,
+                    existingObs: null,
+                    diagnosisDateTime: null,
+                    diagnosisStatusConcept: diagnosis.diagnosisStatusConcept,
+                    voided: diagnosis.voided,
+                    comments: diagnosis.comments,
+                    encounterUuid: diagnosis.encounterUuid
+                };
             });
         } else {
             encounterData.bahmniDiagnoses = [];
@@ -84,7 +75,7 @@ Bahmni.Clinical.EncounterTransactionMapper = function () {
                     return Bahmni.Clinical.Order.discontinue(order);
                 }
                 return { uuid: order.uuid, concept: {name: order.concept.name, uuid: order.concept.uuid },
-                commentToFulfiller: order.commentToFulfiller, urgency: order.urgency};
+                    commentToFulfiller: order.commentToFulfiller, urgency: order.urgency};
             });
             encounterData.orders = encounterData.orders.concat(tempOrders);
         };
