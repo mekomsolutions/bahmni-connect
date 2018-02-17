@@ -5,9 +5,6 @@ angular.module('bahmni.common.domain')
         function ($q, $rootScope, offlineEncounterServiceStrategy, conceptDbService) {
             var self = this;
             var filterAndSortDiagnosis = function (diagnoses) {
-                diagnoses = _.filter(diagnoses, function (singleDiagnosis) {
-                    return singleDiagnosis.revised == false;
-                });
                 diagnoses = _.sortBy(diagnoses, 'diagnosisDateTime').reverse();
                 return diagnoses;
             };
