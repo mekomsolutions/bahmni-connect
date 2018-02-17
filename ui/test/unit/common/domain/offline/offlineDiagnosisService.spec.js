@@ -89,7 +89,7 @@ describe('offlineDiagnosisService', function () {
 
     });
 
-    it('should return filter revised diagnosis for given patient', function () {
+    xit('should return filter revised diagnosis for given patient', function () {
         encounterResponse[0].encounter.bahmniDiagnoses[0].revised = true;
 
         diagnosisService.getDiagnoses(patientUuid, undefined).then(function (result) {
