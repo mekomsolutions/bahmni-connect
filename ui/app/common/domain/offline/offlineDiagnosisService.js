@@ -65,8 +65,10 @@ angular.module('bahmni.common.domain')
             };
 
             this.populateDiagnosisInformation = function (patientUuid, consultation) {
-                consultation.savedDiagnosesFromCurrentEncounter = [];
-                consultation.pastDiagnoses = [];
-                return $q.when(consultation);
+                return this.getPastAndCurrentDiagnoses(patientUuid, consultation.encounterUuid).then(function (diagnosis) {
+                    consultation.pastDiagnoses = diagnosis.pastDiagnoses;
+                    consultation.savedDiagnosesFromCurrentEncounter = diagnosis.savedDiagnosesFromCurrentEncounter;
+                    return consultation;
+                });
             };
         }]);
