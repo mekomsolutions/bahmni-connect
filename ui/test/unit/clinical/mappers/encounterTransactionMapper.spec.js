@@ -93,6 +93,28 @@ describe("EncounterTransactionMapper", function () {
             expect(encounterData.bahmniDiagnoses[0].encounterUuid).toBe(diag1.encounterUuid)
         })
 
+        it('should keep previous diagnoses (savedDiagnosesFromCurrentEncounter) in encounterData.bahmniDiagnoses', function () {
+
+            var diag1 = new Bahmni.Common.Domain.Diagnosis({name: "Dengue", uuid: "a-Uuid-1345"}, "en-counter-uuid-1234");
+            var diag2 = new Bahmni.Common.Domain.Diagnosis({name: "Angina", uuid: "a-Uuid-0987"}, "en-counter-uuid-1234");
+            var diag3 = new Bahmni.Common.Domain.Diagnosis({name: "Spesis", uuid: "a-Uuid-3856"}, "en-counter-uuid-1234");
+
+            var consultation = {
+                newlyAddedDiagnoses: [diag1],
+                savedDiagnosesFromCurrentEncounter: [diag2, diag3]
+            };
+
+            var patient = { uuid:"patientUuid"};
+            
+            var encounterData = mapper.map(consultation, patient);
+            
+            expect(encounterData.bahmniDiagnoses.length).toBe(3)
+            expect(encounterData.bahmniDiagnoses[0].codedAnswer.uuid).toBe("a-Uuid-0987")
+            expect(encounterData.bahmniDiagnoses[1].codedAnswer.uuid).toBe("a-Uuid-3856")
+            expect(encounterData.bahmniDiagnoses[2].codedAnswer.uuid).toBe("a-Uuid-1345")
+        })
+
+
         it('should set program enrollment uuid as patient program uuid', function(){
             var obs = {uuid: "obsUuid"};
             var defaultRetrospectiveVisitType = "IPD";
