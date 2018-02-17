@@ -55,6 +55,7 @@ angular.module('bahmni.clinical')
                 $scope.allowOnlyCodedDiagnosis = appService.getAppDescriptor().getConfig("allowOnlyCodedDiagnosis") &&
                     appService.getAppDescriptor().getConfig("allowOnlyCodedDiagnosis").value;
                 addPlaceHolderDiagnosis();
+                reloadDiagnosesSection($scope.consultation.encounterUuid);
                 diagnosisService.getDiagnosisConceptSet().then(function (result) {
                     $scope.diagnosisMetaData = result.data.results[0];
                     $scope.isStatusConfigured = function () {
