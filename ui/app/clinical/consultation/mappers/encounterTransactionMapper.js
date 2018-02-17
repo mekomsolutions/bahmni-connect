@@ -53,7 +53,8 @@ Bahmni.Clinical.EncounterTransactionMapper = function () {
                     diagnosisDateTime: null,
                     diagnosisStatusConcept: diagnosis.diagnosisStatusConcept,
                     voided: diagnosis.voided,
-                    comments: diagnosis.comments
+                    comments: diagnosis.comments,
+                    encounterUuid: diagnosis.encounterUuid
                 };
             });
         } else {

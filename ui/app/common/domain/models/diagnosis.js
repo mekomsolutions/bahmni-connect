@@ -1,8 +1,9 @@
 'use strict';
 
-Bahmni.Common.Domain.Diagnosis = function (codedAnswer, order, certainty, existingObsUuid, freeTextAnswer, diagnosisDateTime, voided) {
+Bahmni.Common.Domain.Diagnosis = function (codedAnswer, encounterUuid, order, certainty, existingObsUuid, freeTextAnswer, diagnosisDateTime, voided) {
     var self = this;
     self.codedAnswer = codedAnswer;
+    self.encounterUuid = encounterUuid;
     self.order = order;
     self.certainty = certainty;
     self.existingObs = existingObsUuid;

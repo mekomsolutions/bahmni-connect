@@ -28,7 +28,7 @@ angular.module('bahmni.clinical')
                     var concept = item.lookup;
                     var index = $scope.consultation.newlyAddedDiagnoses.indexOf(diagnosisAtIndex);
                     var diagnosisBeingEdited = $scope.consultation.newlyAddedDiagnoses[index];
-                    var diagnosis = new Bahmni.Common.Domain.Diagnosis(concept, diagnosisBeingEdited.order,
+                    var diagnosis = new Bahmni.Common.Domain.Diagnosis(concept, $scope.consultation.encounterUuid, diagnosisBeingEdited.order,
                         diagnosisBeingEdited.certainty, diagnosisBeingEdited.existingObs);
                     if (_canAdd(diagnosis)) {
                         /* TODO:

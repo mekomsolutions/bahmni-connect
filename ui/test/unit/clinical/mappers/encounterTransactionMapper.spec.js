@@ -69,21 +69,28 @@ describe("EncounterTransactionMapper", function () {
 
         });
 
-        it('should keep the diagnoses codedAnswer uuid and name in encounterData', function () {
-            var obs = {uuid: "obsUuid"};
-            var defaultVisitType = "OPD";
+        it('should keep the diagnoses codedAnswer uuid and name in encounterData.bahmniDiagnoses', function () {
             var diag1 = new Bahmni.Common.Domain.Diagnosis({name: "Dengue", uuid: "a-Uuid-1345"});
             var consultation = {
-                observations: obs,
-                providers: [{uuid: "provider-uuid"}],
-                visitUuid: null,
                 newlyAddedDiagnoses: [diag1]
             };
             var patient = { uuid:"patientUuid"};
             
-            var encounterData = mapper.map(consultation, patient, null, {}, null, defaultVisitType, false);
+            var encounterData = mapper.map(consultation, patient);
             expect(encounterData.bahmniDiagnoses[0].codedAnswer.name).toBe(diag1.codedAnswer.name)
             expect(encounterData.bahmniDiagnoses[0].codedAnswer.uuid).toBe(diag1.codedAnswer.uuid)
+        })
+
+        it('should map the encounterUuid field to encounterData.bahmniDiagnoses', function () {
+
+            var diag1 = new Bahmni.Common.Domain.Diagnosis({name: "Dengue", uuid: "a-Uuid-1345"}, "en-counter-uuid-1234");
+            var consultation = {
+                newlyAddedDiagnoses: [diag1]
+            };
+            var patient = { uuid:"patientUuid"};
+            
+            var encounterData = mapper.map(consultation, patient);
+            expect(encounterData.bahmniDiagnoses[0].encounterUuid).toBe(diag1.encounterUuid)
         })
 
         it('should set program enrollment uuid as patient program uuid', function(){
