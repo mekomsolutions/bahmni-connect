@@ -22,8 +22,11 @@ describe("Diagnosis Controller", function () {
         appService.getAppDescriptor.and.returnValue(mockAppDescriptor);
 
         contextChangeHandler = jasmine.createSpyObj('contextChangeHandler', ['add']);
+
         spyOn(diagnosisService, 'getDiagnosisConceptSet').and.returnValue(deferred.promise);
-        
+
+        spyOn(diagnosisService, 'getPastAndCurrentDiagnoses').and.returnValue(deferred.promise);
+
         spinner = jasmine.createSpyObj('spinner', ['forPromise']);
         spinner.forPromise.and.callFake(function (param) {
             return {
@@ -32,6 +35,8 @@ describe("Diagnosis Controller", function () {
                 }
             }
         });
+
+        $scope.patient = {'uuid':'a-uuid-8754'}
 
         $controller('DiagnosisController', {
             $scope: $scope,
