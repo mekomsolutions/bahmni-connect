@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.domain')
-    .service('diagnosisService', ['$q', '$rootScope', 'offlineEncounterServiceStrategy', 'conceptDbService',
-        function ($q, $rootScope, offlineEncounterServiceStrategy, conceptDbService) {
+    .service('diagnosisService', ['$q', '$rootScope', 'offlineEncounterServiceStrategy', 'eventQueue', 'conceptDbService', 'offlineDbService',
+        function ($q, $rootScope, offlineEncounterServiceStrategy, eventQueue, conceptDbService, offlineDbService) {
             var self = this;
             var filterAndSortDiagnosis = function (diagnoses) {
                 diagnoses = _.sortBy(diagnoses, 'diagnosisDateTime').reverse();
@@ -41,8 +41,14 @@ angular.module('bahmni.common.domain')
                 return deferred.promise;
             };
 
-            this.deleteDiagnosis = function (obsUuid) {
-                return $q.when({"data": {}});
+            this.deleteDiagnosis = function (diagnosis) {
+                var event = {type: "deleteDiagnosis", obsUuid: diagnosis.existingObs ? diagnosis.existingObs : diagnosis.previousObs, dbName: offlineDbService.getCurrentDbName() };
+                eventQueue.addToEventQueue(event);
+
+                var deferred = $q.defer();
+                diagnosis.voided = true;
+                deferred.resolve({"data": diagnosis});
+                return deferred.promise;
             };
 
             this.getDiagnosisConceptSet = function () {

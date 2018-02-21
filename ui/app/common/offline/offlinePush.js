@@ -61,6 +61,14 @@ angular.module('bahmni.common.offline')
 
                     if (event.data.type && event.data.type == "encounter") {
                         return $http.post(Bahmni.Common.Constants.bahmniEncounterUrl, response.encounter, config);
+                    } if (event.data.type && event.data.type == "deleteDiagnosis") {
+                        return $http({
+                            method: 'GET',
+                            url: Bahmni.Common.Constants.bahmniDeleteDiagnosisUrl,
+                            params: response,
+                            withCredentials: config.withCredentials,
+                            headers: config.headers
+                        });
                     } else if (event.data.type && event.data.type === "Error") {
                         return $http.post(Bahmni.Common.Constants.loggingUrl, angular.toJson(response));
                     } else {
@@ -79,6 +87,10 @@ angular.module('bahmni.common.offline')
                 var getEventData = function (event, db) {
                     if (event.data.type && event.data.type == "encounter") {
                         return offlineDbService.getEncounterByEncounterUuid(event.data.encounterUuid, db);
+                    } else if (event.data.type && event.data.type == "deleteDiagnosis") {
+                        var deferred = $q.defer();
+                        deferred.resolve({obsUuid: event.data.obsUuid});
+                        return deferred.promise;
                     } else if (event.data.type && event.data.type === "Error") {
                         return offlineDbService.getErrorLogByUuid(event.data.uuid, db);
                     } else {

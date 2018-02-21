@@ -176,6 +176,10 @@ describe('Offline Push Tests', function () {
         }, 100);
     });
 
+        it('should push deleteDiagnosis event from event queue', function () {
+            // TO BE IMPLEMENTED
+        });
+
         it("should push encounter data from event queue", function (done) {
             event.data = {type: "encounter", dbName: "dbOne", encounterUuid: 'encounterUuid'};
             httpBackend.expectPOST(Bahmni.Common.Constants.bahmniEncounterUrl).respond(200, {});

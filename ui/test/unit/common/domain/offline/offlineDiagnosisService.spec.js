@@ -2,7 +2,7 @@
 
 describe('offlineDiagnosisService', function () {
 
-    var diagnosisService, encounterServiceStrategy, conceptDbService;
+    var diagnosisService, encounterServiceStrategy, eventQueue, conceptDbService, offlineDbService;
     var $q = Q;
     var patientUuid = 'fc6ede09-f16f-4877-d2f5-ed8b2182ec10';
 
@@ -13,10 +13,12 @@ describe('offlineDiagnosisService', function () {
         $provide.value('$q', $q);
     }));
 
-    beforeEach(inject(['diagnosisService', '$rootScope', 'offlineEncounterServiceStrategy', 'conceptDbService', function (diagnosisServiceInjected, $rootScopeInjeced, encounterServiceStrategyInjected, conceptDbServiceInjected) {
+    beforeEach(inject(['diagnosisService', '$rootScope', 'offlineEncounterServiceStrategy', 'eventQueue', 'conceptDbService', 'offlineDbService', function (diagnosisServiceInjected, $rootScopeInjeced, encounterServiceStrategyInjected, eventQueueInjected, conceptDbServiceInjected, offlineDbServiceInjected) {
         diagnosisService = diagnosisServiceInjected;
         encounterServiceStrategy = encounterServiceStrategyInjected;
         conceptDbService = conceptDbServiceInjected;
+        eventQueue = eventQueueInjected;
+        offlineDbService = offlineDbServiceInjected;
 
         spyOn(encounterServiceStrategy, 'getEncountersByPatientUuid').and.callFake(function () {
             return {
@@ -37,7 +39,7 @@ describe('offlineDiagnosisService', function () {
     }]));
 
 
-    it('should return all the diagnosis for given patient', function (done) {
+    it('should return all the diagnoses for given patient', function (done) {
 
         diagnosisService.getDiagnoses(patientUuid, undefined).then(function (result) {
             expect(result.data.length).toBe(2);
@@ -55,6 +57,17 @@ describe('offlineDiagnosisService', function () {
             done();
         });
     });
+
+    it('should register an event and void the diagnosis when deleteDiagnosis()', function (done) {
+        spyOn(eventQueue, 'addToEventQueue').and.returnValue(null);
+
+        var mockDiag = {uuid:"someUuid", voided:false};
+        diagnosisService.deleteDiagnosis(mockDiag).then(function(result) {
+            expect(eventQueue.addToEventQueue).toHaveBeenCalled()
+            expect(result.data.voided).toBe(true)
+            done()
+        })
+    })
 
     it('should split past and current diagnoses into 2 arrays', function (done) {
         var encounterUuid = "077b4748-cead-4f0d-974b-31d63a5fdb37";
@@ -77,16 +90,23 @@ describe('offlineDiagnosisService', function () {
         })
     });
 
-    it('should return the sorted diagnosis based on the date and time of diagnosis for given patient', function () {
+    it('should void diagnosis when delete', function(done) {
+        var diag = encounterResponse[0].encounter.bahmniDiagnoses
+        diagnosisService.deleteDiagnosis(diag).then(function (result) {
+            expect(result.data.voided).toBe(true)
+            done();
+        })
+    });
+
+    it('should return the sorted diagnosis based on the date and time of diagnosis for given patient', function (done) {
         diagnosisService.getDiagnoses(patientUuid, undefined).then(function (result) {
             expect(result.data.length).toBe(2);
             expect(result.data[0].freeTextAnswer).toBe("free text");
             expect(result.data[0].codedAnswer).toBeNull();
             expect(result.data[1].codedAnswer.name).toBe("Paracetamol");
             expect(result.data[1].freeTextAnswer).toBeNull();
+            done()
         });
-
-
     });
 
     xit('should return filter revised diagnosis for given patient', function () {

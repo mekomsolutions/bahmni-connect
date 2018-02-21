@@ -137,17 +137,16 @@ angular.module('bahmni.clinical')
             };
 
             $scope.deleteDiagnosis = function (diagnosis) {
-                var obsUUid = diagnosis.existingObs !== null ? diagnosis.existingObs : diagnosis.previousObs;
-
                 spinner.forPromise(
-                        diagnosisService.deleteDiagnosis(obsUUid).then(function () {
-                            messagingService.showMessage('info', 'Deleted');
-                            var currentUuid = $scope.consultation.savedDiagnosesFromCurrentEncounter.length > 0 ?
-                                $scope.consultation.savedDiagnosesFromCurrentEncounter[0].encounterUuid : "";
-                            return reloadDiagnosesSection(currentUuid);
-                        }))
-                    .then(function () {});
+                    diagnosisService.deleteDiagnosis(diagnosis).then(function () {
+                        messagingService.showMessage('info', 'Deleted');
+                        var currentUuid = $scope.consultation.savedDiagnosesFromCurrentEncounter.length > 0 ?
+                        $scope.consultation.savedDiagnosesFromCurrentEncounter[0].encounterUuid : "";
+                        return reloadDiagnosesSection(currentUuid);
+                    }))
+                .then(function () {});
             };
+
             var clearBlankDiagnosis = true;
             var removeBlankDiagnosis = function () {
                 if (clearBlankDiagnosis) {

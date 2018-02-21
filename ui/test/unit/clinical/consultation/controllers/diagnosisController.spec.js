@@ -1,5 +1,5 @@
 describe("Diagnosis Controller", function () {
-    var $scope, rootScope, contextChangeHandler,mockDiagnosisService, spinner, appService, mockAppDescriptor, q, deferred, mockDiagnosisData;
+    var $scope, rootScope, contextChangeHandler, mockDiagnosisService, spinner, appService, mockAppDescriptor, q, deferred, mockDiagnosisData;
 
     beforeEach(module('bahmni.clinical'));
     beforeEach(module('bahmni.common.offline'));
@@ -24,9 +24,9 @@ describe("Diagnosis Controller", function () {
         contextChangeHandler = jasmine.createSpyObj('contextChangeHandler', ['add']);
 
         spyOn(diagnosisService, 'getDiagnosisConceptSet').and.returnValue(deferred.promise);
-
         spyOn(diagnosisService, 'getPastAndCurrentDiagnoses').and.returnValue(deferred.promise);
-
+        spyOn(diagnosisService, 'deleteDiagnosis').and.returnValue(deferred.promise);
+            
         spinner = jasmine.createSpyObj('spinner', ['forPromise']);
         spinner.forPromise.and.callFake(function (param) {
             return {
@@ -128,6 +128,16 @@ describe("Diagnosis Controller", function () {
             expect($scope.cleanOutDiagnosisList(data).length).toEqual(2)
             expect($scope.cleanOutDiagnosisList(data)[0].concept.name).toEqual(diagConcept2.concept.name)
             expect($scope.cleanOutDiagnosisList(data)[1].concept.name).toEqual(diagConcept3.concept.name)
+        })
+    })
+
+    describe('deleteDiagnosis()', function () {
+        it('should delete an existing diagnosis', function() {
+            var encounterUuid = "1234-4321"
+            var mockDiagnosis = new Bahmni.Common.Domain.Diagnosis({"name": "Otitis", "uuid":"SomeUuid-9877", "encounterUuid": encounterUuid});
+
+            $scope.deleteDiagnosis(mockDiagnosis)
+            expect(mockDiagnosisService.deleteDiagnosis).toHaveBeenCalledWith(mockDiagnosis)
         })
     })
 
