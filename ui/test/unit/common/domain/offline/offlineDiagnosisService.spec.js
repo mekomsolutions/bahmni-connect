@@ -58,6 +58,24 @@ describe('offlineDiagnosisService', function () {
         });
     });
 
+    it('should return the Diagnosis Concept Set', function (done) {
+
+        var diagnosisConceptSet = Bahmni.Clinical.Constants.diagnosisObservationConceptName
+
+        spyOn(conceptDbService, 'getConceptByName').and.callFake(function (searchTerm) {
+            return {
+                then: function (callback) {
+                    return callback({"name":"visit diagnoses"})
+                }
+            };
+        });
+
+        diagnosisService.getDiagnosisConceptSet().then(function (result) {
+            expect(result.data.results[0].name).toEqual('visit diagnoses');
+            done();         
+        });
+    });
+
     it('should register an event and void the diagnosis when deleteDiagnosis()', function (done) {
         spyOn(eventQueue, 'addToEventQueue').and.returnValue(null);
 

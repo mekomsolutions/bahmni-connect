@@ -52,7 +52,11 @@ angular.module('bahmni.common.domain')
             };
 
             this.getDiagnosisConceptSet = function () {
-                return $q.when({"data": {}});
+                var deferred = $q.defer();
+                conceptDbService.getConceptByName(Bahmni.Clinical.Constants.diagnosisObservationConceptName).then(function (concept) {
+                    deferred.resolve({"data": {"results": [concept]}});
+                });
+                return deferred.promise;
             };
 
             this.getPastAndCurrentDiagnoses = function (patientUuid, encounterUuid) {
