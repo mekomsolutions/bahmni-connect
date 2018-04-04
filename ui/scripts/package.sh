@@ -23,7 +23,9 @@ echo "Starting Xvfb process $XVFB_PID"
 rm -rf dist/*
 
 grunt chrome
-npm run sw
+
+echo "Generate Service Workers"
+grunt generate-sw
 cp -r dist/* bahmni-connect-apps
 zip -r bahmni-connect-apps.zip bahmni-connect-apps
 
